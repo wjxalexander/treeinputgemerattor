@@ -2,11 +2,11 @@ import React from "react";
 import ReactDOM from "react-dom";
 
 import "./styles.css";
-import { InputForm } from "./demo2";
+import { FormTable } from "./demo2";
 function App() {
   return (
     <div className="App">
-      <InputForm />
+      <FormTable />
     </div>
   );
 }

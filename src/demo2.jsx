@@ -1,102 +1,178 @@
 import React, { useEffect, useReducer } from "react";
-import { Input, Icon, Button } from "antd";
+import { Input, Icon, Button, Form } from "antd";
+import { column } from "./config.js";
 import * as R from "ramda";
+import style from "./index.module.scss";
+import { CustomerInputGroup } from "./addform";
 const uuidv4 = require("uuid/v4");
 
 const InputGroup = Input.Group;
+const options = [
+  { label: "是", value: 1 },
+  { label: "否", value: 0 }
+];
 
-export const CustomerInputGroup = props => {
-  const { state, dispatch, item } = props;
-
-  const addChild = () => {
-    console.log(item,props,'click');
-    console.log(state);
-    console.log("__________")
-    dispatch({ type: "appendChild", id: item.id, path:item.path });
+export const InputForm = props => {
+  const { initialData = [], form } = props;
+  const [state, dispatch] = useReducer(reducer, initialData, init);
+  const increment = () => dispatch({ type: "increment" });
+  const submit = e => {
+    e.preventDefault();
+    form.validateFields((err, values) => {
+      if (!err) {
+        console.log("Received values of form: ", values);
+      }
+    });
   };
   return (
-    <div style={{display:'flex',width:"200px"}}>
-      <Icon onClick={addChild} type="plus-circle" />
-      <InputGroup compact>
-        <Input defaultValue="0571" />
-        {/* <Input defaultValue="26888888" /> */}
-      </InputGroup>
-      <Icon type="minus-circle" />
+    <>
+      {state.data.children.map(item => (
+        <div key={item.id}>
+          {recursionMethod(item, 0, state, dispatch, form)}
+        </div>
+      ))}
+      <Button onClick={increment}> add </Button>
+      <Button onClick={submit}> submit </Button>
+    </>
+  );
+};
+
+export const FormTable = Form.create({ name: "register" })(InputForm);
+
+const recursionMethod = (item, level, state, dispatch, form) => {
+  if (item.children.length === 0) {
+    return (
+      <div key={item.id} style={{ paddingLeft: "30px" }}>
+        <CustomerInputGroup
+          form={form}
+          item={item}
+          state={state}
+          dispatch={dispatch}
+        />
+      </div>
+    );
+  }
+  return (
+    <div key={item.id} style={{ paddingLeft: "30px" }}>
+      <CustomerInputGroup
+        form={form}
+        item={item}
+        state={state}
+        dispatch={dispatch}
+      />
+      {item.children.map(ele =>
+        recursionMethod(ele, level + 1, state, dispatch, form)
+      )}
     </div>
   );
 };
 
-export const InputForm = props => {
-  const { initialData = [] } = props;
-  const [state, dispatch] = useReducer(reducer, initialData, init);
-  const increment = () => dispatch({ type: "increment" });
-
-  return (
-    <>
-      {state.data.map(item => (
-        <div key={item.id}>{recursionMethod(item, 0, state, dispatch)}</div>
-      ))}
-      <Button onClick={increment}> add </Button>
-    </>
-  );
-};
-
-const recursionMethod = (item, level, state, dispatch) => {
-  // console.log(item, level);
-  if (item.children.length === 0) {
-    return (
-      <>
-        <span>{level}</span>
-        <CustomerInputGroup item={item} state={state} dispatch={dispatch} />
-      </>
-    );
-  }
-  // console.log(item);
-  return (
-    <>
-      <span>{level}</span>
-      <CustomerInputGroup item={item} state={state} dispatch={dispatch} />
-      {item.children.map(ele =>
-        recursionMethod(ele, level + 1, state, dispatch)
-      )}
-    </>
-  );
-};
-
 function init(initialData) {
-  return { data: initialData };
+  const topRoot = {
+    id: "_root",
+    path: "0",
+    children: initialData
+  };
+  return { data: topRoot };
 }
 
 function reducer(state, action) {
   switch (action.type) {
     case "increment":
-      // console.log(getNewItem());
-      return { ...state, data: [...state.data, getNewItem(0,state.data.length)] };
-    case "decrement":
-      return { count: state.count - 1 };
+      return { ...state, data: addFirstLevelChild(state.data) };
+    case "remove":
+      return { ...state, data: removeFunc(state.data, action) };
     case "appendChild":
       return { ...state, data: appendChildFunc(state.data, action) };
+    case "onChange":
+      return { ...state, data: onChange(state.data, action) };
     default:
       throw new Error();
   }
 }
 
-function appendChildFunc(list, action) {
-  // console.log(newList);
+function addFirstLevelChild(data) {
+  const newData = R.clone(data);
+  newData.children = newData.children.concat(
+    getNewItem(newData.path, newData.children.length)
+  );
+  return newData;
+}
 
+function getNewlistAndpathArr(list, action) {
   const newList = R.clone(list);
-  const { id,path } = action;
-  console.log(list, id,path,"path!!!!");
-  const pathArr = path.split("-").slice(1)
-  let final = newList
-  const pos = pathArr.shift()
-  final = final[pos]
-  while(pathArr.length > 0){
-    final = final.children[pathArr.shift()]
+  const { path, id, key } = action;
+  const pathArr = path.split("-").slice(1);
+  return [newList, pathArr, id, key];
+}
+
+function trace(list, pathArr, threshold = 0){
+  while(pathArr.length > threshold){
+    list = list.children[pathArr.shift()]
   }
-  final.children = [...final.children, getNewItem(path,final.children.length)];
-  console.log(newList,final);
+}
+
+function appendChildFunc(list, action) {
+  const [newList, pathArr] = getNewlistAndpathArr(list, action);
+  let final = newList;
+  while (pathArr.length > 0) {
+    final = final.children[pathArr.shift()];
+  }
+  final.children = [
+    ...final.children,
+    getNewItem(final.path, final.children.length)
+  ];
   return newList;
+}
+
+export function getValue(list, action) {
+  const [newList, pathArr, id, key] = getNewlistAndpathArr(list, action);
+  let final = newList;
+  while (pathArr.length > 0) {
+    final = final.children[pathArr.shift()];
+  }
+  return final[key];
+}
+
+function onChange(list, action) {
+  const [newList, pathArr, id, key] = getNewlistAndpathArr(list, action);
+  const { value } = action;
+  let final = newList;
+  while (pathArr.length > 0) {
+    final = final.children[pathArr.shift()];
+  }
+  final[key] = value;
+  return newList;
+}
+
+function removeFunc(list, action) {
+  const [newList, pathArr, id] = getNewlistAndpathArr(list, action);
+  let finalfatther = newList;
+  let fatherindex = 0;
+  while (pathArr.length > 1) {
+    fatherindex = pathArr.shift();
+    finalfatther = finalfatther.children[fatherindex];
+  }
+
+  finalfatther.children = R.compose(
+    childrenPathregernerator(finalfatther.path),
+    R.reject(ele => ele.id === id)
+  )(finalfatther.children);
+  return newList;
+}
+
+function childrenPathregernerator(fatherPath) {
+  return function getfilterList(list = []) {
+    if (list.length === 0) {
+      return [];
+    }
+    const newlist = R.clone(list);
+    newlist.forEach((item, index) => {
+      item.path = `${fatherPath}-${index}`;
+      childrenPathregernerator(item.children, item.path);
+    });
+    return newlist;
+  };
 }
 
 const getId = () => {
@@ -106,10 +182,10 @@ const getId = () => {
 const getNewItem = (fatherPath, index) => {
   return {
     id: getId(),
-    columnName: "",
-    chineseName: "",
-    path:`${fatherPath}-${index}`,
-    children: []
+    path: `${fatherPath}-${index}`,
+    children: [],
+    nameA: "1",
+    nameB: "2",
+    nameC: "3"
   };
 };
-
