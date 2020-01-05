@@ -22,6 +22,7 @@ export const CustomerInputGroup = ({ state, dispatch, item }) => {
     dispatch({ type: "appendChild", id: item.id, path: item.path });
   };
   const removeItem = () => {
+    console.log(item,"!!!")
     dispatch({ type: "remove", id: item.id, path: item.path });
   };
 
@@ -36,9 +37,11 @@ export const CustomerInputGroup = ({ state, dispatch, item }) => {
   };
 
   return (
-    <InputGroup compact>
-      <div className={style.inputGroup}>
-        <Icon onClick={addChild} type="plus-circle" />
+    <div className={style.inputGroup}>
+      <InputGroup compact>
+        <span className={style.plus}>
+          <Icon onClick={addChild} type="plus-circle" />
+        </span>
         {column.map(ele => {
           const value = getValue(state.data, {
             id: item.id,
@@ -50,28 +53,17 @@ export const CustomerInputGroup = ({ state, dispatch, item }) => {
               key={`${item.id}-${ele.key}`}
               value={value}
               style={{ width: configWidth[ele.key] }}
-              placeholder={item.placeholder}
+              placeholder={ele.placeholder}
               onChange={e => onChange(ele.key, e)}
             />
           );
         })}
-        <Icon onClick={removeItem} type="minus-circle" />
-      </div>
-    </InputGroup>
+        <span  className={style.minus}>
+          <Icon onClick={removeItem} type="minus-circle" />
+        </span>
+      </InputGroup>
+    </div>
   );
 };
-// const MemoInput = (value) => {
-//   return useCallback(
-//     ({ value, onChange, placeholder, key, label }) => {
-//       return (
-//         <Input
-//           value={value}
-//           style={{ width: configWidth[label] }}
-//           placeholder={placeholder}
-//           onChange={onChange}
-//         />
-//       );
-//     },
-//     [value]
-//   );
-// };
+
+

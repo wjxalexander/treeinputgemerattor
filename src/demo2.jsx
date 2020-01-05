@@ -13,53 +13,37 @@ const options = [
 ];
 
 export const InputForm = props => {
-  const { initialData = [], form } = props;
+  const { initialData = [] } = props;
   const [state, dispatch] = useReducer(reducer, initialData, init);
   const increment = () => dispatch({ type: "increment" });
   const submit = e => {
     e.preventDefault();
-    form.validateFields((err, values) => {
-      if (!err) {
-        console.log("Received values of form: ", values);
-      }
-    });
   };
   return (
     <>
-      {state.data.children.map(item => (
-        <div key={item.id}>
-          {recursionMethod(item, 0, state, dispatch, form)}
-        </div>
-      ))}
+      <div className={style.topCon}>
+        {state.data.children.map(item => (
+          <div key={item.id}>{recursionMethod(item, 0, state, dispatch)}</div>
+        ))}
+      </div>
+
       <Button onClick={increment}> add </Button>
       <Button onClick={submit}> submit </Button>
     </>
   );
 };
 
-export const FormTable = Form.create({ name: "register" })(InputForm);
-
 const recursionMethod = (item, level, state, dispatch, form) => {
   if (item.children.length === 0) {
     return (
       <div key={item.id} style={{ paddingLeft: "30px" }}>
-        <CustomerInputGroup
-          form={form}
-          item={item}
-          state={state}
-          dispatch={dispatch}
-        />
+        <CustomerInputGroup item={item} state={state} dispatch={dispatch} />
       </div>
     );
   }
   return (
     <div key={item.id} style={{ paddingLeft: "30px" }}>
-      <CustomerInputGroup
-        form={form}
-        item={item}
-        state={state}
-        dispatch={dispatch}
-      />
+      <CustomerInputGroup item={item} state={state} dispatch={dispatch} />
       {item.children.map(ele =>
         recursionMethod(ele, level + 1, state, dispatch, form)
       )}
@@ -106,9 +90,9 @@ function getNewlistAndpathArr(list, action) {
   return [newList, pathArr, id, key];
 }
 
-function trace(list, pathArr, threshold = 0){
-  while(pathArr.length > threshold){
-    list = list.children[pathArr.shift()]
+function trace(list, pathArr, threshold = 0) {
+  while (pathArr.length > threshold) {
+    list = list.children[pathArr.shift()];
   }
 }
 
@@ -129,9 +113,17 @@ export function getValue(list, action) {
   const [newList, pathArr, id, key] = getNewlistAndpathArr(list, action);
   let final = newList;
   while (pathArr.length > 0) {
-    final = final.children[pathArr.shift()];
+    if(final && final.children){
+      final = final.children[pathArr.shift()];
+    }else{
+      break
+    }
   }
-  return final[key];
+  if(R.isEmpty(final)|| R.isNil(final)){
+    return ""
+  }
+  const pointHas = R.has(R.__, final);
+  return  pointHas(key) ? final[key] : ""
 }
 
 function onChange(list, action) {
@@ -148,12 +140,13 @@ function onChange(list, action) {
 function removeFunc(list, action) {
   const [newList, pathArr, id] = getNewlistAndpathArr(list, action);
   let finalfatther = newList;
+  // console.log(newList,pathArr)
   let fatherindex = 0;
   while (pathArr.length > 1) {
     fatherindex = pathArr.shift();
     finalfatther = finalfatther.children[fatherindex];
   }
-
+  // console.log(finalfatther)
   finalfatther.children = R.compose(
     childrenPathregernerator(finalfatther.path),
     R.reject(ele => ele.id === id)
@@ -166,12 +159,12 @@ function childrenPathregernerator(fatherPath) {
     if (list.length === 0) {
       return [];
     }
-    const newlist = R.clone(list);
-    newlist.forEach((item, index) => {
-      item.path = `${fatherPath}-${index}`;
-      childrenPathregernerator(item.children, item.path);
+    list.forEach((item, index) => {
+      const newPath = `${fatherPath}-${index}`
+      item.path = newPath;
+      return childrenPathregernerator(newPath)(item.children);
     });
-    return newlist;
+    return list;
   };
 }
 
@@ -184,8 +177,8 @@ const getNewItem = (fatherPath, index) => {
     id: getId(),
     path: `${fatherPath}-${index}`,
     children: [],
-    nameA: "1",
-    nameB: "2",
-    nameC: "3"
+    nameA: "",
+    nameB: "",
+    nameC: ""
   };
 };

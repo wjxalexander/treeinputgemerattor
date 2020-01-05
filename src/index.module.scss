@@ -1,5 +1,19 @@
 .inputGroup {
-  // width:500px;
-  display: inline-flex;
-  align-items: center
+  margin: 20px auto;
+  >span{
+    display: inline-flex;
+    align-items: center;
+    >span{
+      height: 32px;
+      padding: 4px 10px;
+      display: block;
+      justify-content: center;
+      align-items: center;
+      border: 1px solid #d9d9d9;
+    }
+  }
+}
+.topCon{
+   width: 80vw;
+  
 }
