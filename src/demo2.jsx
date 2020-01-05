@@ -44,7 +44,7 @@ const recursionMethod = (item, level, state, dispatch, form) => {
   if (item.children.length === 0) {
     return (
       <div
-      className={style.line}
+      // className={style.line}
         key={`${item.id}-${level}`}
       >
         <CustomerInputGroup item={item} state={state} dispatch={dispatch} />
