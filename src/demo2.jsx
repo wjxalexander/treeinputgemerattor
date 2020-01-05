@@ -33,20 +33,32 @@ export const InputForm = props => {
   );
 };
 
+const grouStyle = {
+  paddingLeft: "15px",
+  marginLeft: "15px",
+  borderLeft: "1px dashed rgba(0, 0, 0, 0.4)"
+};
+
 const recursionMethod = (item, level, state, dispatch, form) => {
+  console.log(level);
   if (item.children.length === 0) {
     return (
-      <div key={item.id} style={{ paddingLeft: "30px" }}>
+      <div
+      className={style.line}
+        key={`${item.id}-${level}`}
+      >
         <CustomerInputGroup item={item} state={state} dispatch={dispatch} />
       </div>
     );
   }
   return (
-    <div key={item.id} style={{ paddingLeft: "30px" }}>
+    <div key={`${item.id}-${level}`}>
       <CustomerInputGroup item={item} state={state} dispatch={dispatch} />
-      {item.children.map(ele =>
-        recursionMethod(ele, level + 1, state, dispatch, form)
-      )}
+      <div  style={{ ...grouStyle }}>
+        {item.children.map(ele =>
+          recursionMethod(ele, level + 1, state, dispatch, form)
+        )}
+      </div>
     </div>
   );
 };
@@ -113,17 +125,17 @@ export function getValue(list, action) {
   const [newList, pathArr, id, key] = getNewlistAndpathArr(list, action);
   let final = newList;
   while (pathArr.length > 0) {
-    if(final && final.children){
+    if (final && final.children) {
       final = final.children[pathArr.shift()];
-    }else{
-      break
+    } else {
+      break;
     }
   }
-  if(R.isEmpty(final)|| R.isNil(final)){
-    return ""
+  if (R.isEmpty(final) || R.isNil(final)) {
+    return "";
   }
   const pointHas = R.has(R.__, final);
-  return  pointHas(key) ? final[key] : ""
+  return pointHas(key) ? final[key] : "";
 }
 
 function onChange(list, action) {
@@ -160,7 +172,7 @@ function childrenPathregernerator(fatherPath) {
       return [];
     }
     list.forEach((item, index) => {
-      const newPath = `${fatherPath}-${index}`
+      const newPath = `${fatherPath}-${index}`;
       item.path = newPath;
       return childrenPathregernerator(newPath)(item.children);
     });

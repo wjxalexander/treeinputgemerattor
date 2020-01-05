@@ -17,3 +17,16 @@
    width: 80vw;
   
 }
+.line{
+  position: relative;
+  &::before{
+    display: inline-block;
+    content: "";
+    width: 20px;
+    border: 1px dashed rgba(0, 0, 0, 0.4);
+    position: absolute;
+    left: 0;
+    top: 50%;
+  }
+ 
+}
