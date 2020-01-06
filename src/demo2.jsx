@@ -23,7 +23,7 @@ export const InputForm = props => {
     <>
       <div className={style.topCon}>
         {state.data.children.map(item => (
-          <div key={item.id}>{recursionMethod(item, 0, state, dispatch)}</div>
+          recursionMethod(item, 0, state, dispatch)
         ))}
       </div>
 
@@ -44,17 +44,18 @@ const recursionMethod = (item, level, state, dispatch, form) => {
   if (item.children.length === 0) {
     return (
       <div
-      // className={style.line}
         key={`${item.id}-${level}`}
       >
-        <CustomerInputGroup item={item} state={state} dispatch={dispatch} />
+        <CustomerInputGroup className={level > 0 ? style.line : undefined}
+          item={item} state={state} dispatch={dispatch} />
       </div>
     );
   }
   return (
     <div key={`${item.id}-${level}`}>
-      <CustomerInputGroup item={item} state={state} dispatch={dispatch} />
-      <div  style={{ ...grouStyle }}>
+      <CustomerInputGroup className={level > 0 ? style.line : undefined}
+        item={item} state={state} dispatch={dispatch} />
+      <div style={{ ...grouStyle }}>
         {item.children.map(ele =>
           recursionMethod(ele, level + 1, state, dispatch, form)
         )}

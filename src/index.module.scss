@@ -1,32 +1,37 @@
 .inputGroup {
   margin: 20px auto;
-  >span{
+
+  >span {
     display: inline-flex;
     align-items: center;
-    >span{
+
+    >span {
       height: 32px;
       padding: 4px 10px;
       display: block;
-      justify-content: center;
+      justify-content: flex-start;
       align-items: center;
       border: 1px solid #d9d9d9;
     }
   }
 }
-.topCon{
-   width: 80vw;
-  
+
+.topCon {
+  // width: 80vw;
+
 }
-.line{
+
+.line {
   position: relative;
-  &::before{
-    display: inline-block;
-    content: "";
-    width: 20px;
-    border: 1px dashed rgba(0, 0, 0, 0.4);
-    position: absolute;
-    left: 0;
-    top: 50%;
-  }
- 
+
+  // &::before {
+  //   display: inline-block;
+  //   content: "";
+  //   width: 15px;
+  //   border: 1px dashed rgba(0, 0, 0, 0.4);
+  //   position: absolute;
+  //   left: -15px;
+  //   top: 50%;
+  // }
+
 }

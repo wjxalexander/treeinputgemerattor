@@ -4,7 +4,7 @@ import { column } from "./config.js";
 import { getValue } from "./demo2.jsx";
 import * as R from "ramda";
 import style from "./index.module.scss";
-const uuidv4 = require("uuid/v4");
+import cls from "classnames"
 
 const InputGroup = Input.Group;
 const options = [
@@ -12,12 +12,12 @@ const options = [
   { label: "否", value: 0 }
 ];
 const configWidth = {
-  nameA: "20%",
-  nameB: "30%",
-  nameC: "40%"
+  name: "20%",
+  default: "30%",
+  description: "40%"
 };
 
-export const CustomerInputGroup = ({ state, dispatch, item }) => {
+export const CustomerInputGroup = ({ state, dispatch, item,className }) => {
   const addChild = () => {
     dispatch({ type: "appendChild", id: item.id, path: item.path });
   };
@@ -37,7 +37,7 @@ export const CustomerInputGroup = ({ state, dispatch, item }) => {
   };
 
   return (
-    <div className={style.inputGroup}>
+    <div className={cls(style.inputGroup,className)}>
       <InputGroup compact>
         <span className={style.plus}>
           <Icon onClick={addChild} type="plus-circle" />
